@@ -17,5 +17,28 @@
       "capture_method": "manual",
       "scenario_type": "grounded_customer_support"
     }
+  },
+  {
+  "checkpoint_id": "REQ-002",
+  "stage": "requirement_interpretation",
+  "source_input": "Build a leave-management application for employees and managers. Employees must be able to submit leave requests and view their leave balance. Managers must be able to approve or reject requests. The system must not allow employees to approve their own requests.",
+  "actual_artifact": "Create a leave-management application with employee and manager roles. Employees can submit leave requests and view their available leave balance. Managers can review, approve, or reject employee requests. Approval permissions must be restricted so that employees cannot approve their own leave requests.",
+  "expected_behavior": "The interpretation must preserve the employee and manager roles, leave submission, balance viewing, manager approval and rejection, and the restriction preventing employees from approving their own requests. It must not invent payroll or attendance functionality.",
+  "required_terms": [
+    "employees",
+    "managers",
+    "leave balance",
+    "approve",
+    "reject"
+  ],
+  "forbidden_terms": [
+    "payroll",
+    "attendance tracking"
+  ],
+  "metadata": {
+    "dataset_version": "requirement-interpretation-v1",
+    "capture_method": "manual",
+    "scenario_type": "role_based_leave_management"
   }
+}
 ]

@@ -47,17 +47,32 @@ class CheckpointRunner:
         )
 
     def build_metrics(
-        self,
-        stage: ArchitectStage,
+            self,
+            stage: ArchitectStage,
+            threshold: float | None = None,
     ) -> list:
         """
-        Select the semantic metrics for the checkpoint stage.
+        Select semantic metrics for the checkpoint stage.
+
+        A custom threshold may be supplied for stricter
+        regression quality gates.
         """
+
+        effective_threshold = (
+            self.settings.semantic_threshold
+            if threshold is None
+            else threshold
+        )
+
+        if not 0 <= effective_threshold <= 1:
+            raise ValueError(
+                "Metric threshold must be between 0 and 1."
+            )
 
         if stage == ArchitectStage.REQUIREMENT_INTERPRETATION:
             return build_requirement_interpretation_metrics(
                 model=self.settings.judge_model,
-                threshold=self.settings.semantic_threshold,
+                threshold=effective_threshold,
             )
 
         raise ValueError(
