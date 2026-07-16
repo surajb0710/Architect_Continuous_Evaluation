@@ -1,17 +1,22 @@
-from checkpoints import ArchitectStage, EvaluationCheckpoint
-from deterministic_checks import (
-    ForbiddenTermsCheck,
-    RequiredTermsCheck,
+from pathlib import Path
+
+from checkpoints.checkpoint_result import CheckpointResult
+from checkpoints.checkpoint_status import CheckpointStatus
+from data_loaders.requirement_interpretation_loader import (
+    RequirementInterpretationDatasetLoader,
 )
 from evaluation_settings import EvaluationSettings
-from evaluations import CheckpointRunner
+from evaluations.checkpoint_runner import CheckpointRunner
 
 
-def print_checkpoint_result(result) -> None:
-    """
-    Print the combined semantic and deterministic outcome.
-    """
+DATASET_PATH = Path(
+    "datasets/requirement_interpretation.json"
+)
 
+
+def print_checkpoint_result(
+    result: CheckpointResult,
+) -> None:
     print("\n" + "=" * 70)
     print("CHECKPOINT RESULT")
     print("=" * 70)
@@ -50,68 +55,79 @@ def print_checkpoint_result(result) -> None:
 
     print("Combined outcome")
     print("-" * 70)
-    print(f"Semantic passed      : {result.semantic_passed}")
+    print(
+        f"Semantic passed      : "
+        f"{result.semantic_passed}"
+    )
     print(
         f"Deterministic passed : "
         f"{result.deterministic_passed}"
     )
-    print(f"Checkpoint status    : {result.status.value.upper()}")
+    print(
+        f"Checkpoint status    : "
+        f"{result.status.value.upper()}"
+    )
+
+
+def print_run_summary(
+    results: list[CheckpointResult],
+) -> None:
+    passed = sum(
+        result.status == CheckpointStatus.PASS
+        for result in results
+    )
+
+    warnings = sum(
+        result.status == CheckpointStatus.WARNING
+        for result in results
+    )
+
+    failed = sum(
+        result.status == CheckpointStatus.FAIL
+        for result in results
+    )
+
+    print("\n" + "=" * 70)
+    print("EVALUATION RUN SUMMARY")
+    print("=" * 70)
+    print(f"Total checkpoints : {len(results)}")
+    print(f"Passed            : {passed}")
+    print(f"Warnings          : {warnings}")
+    print(f"Failed            : {failed}")
 
 
 def main() -> None:
     settings = EvaluationSettings()
 
-    checkpoint = EvaluationCheckpoint(
-        checkpoint_id="REQ-001",
-        stage=ArchitectStage.REQUIREMENT_INTERPRETATION,
-        source_input=(
-            "Build a customer-support application that answers "
-            "questions only from uploaded company policy documents. "
-            "When the requested information is unavailable, the "
-            "application must clearly say that it cannot find the "
-            "answer and must not invent company policy."
-        ),
-        actual_artifact=(
-            "Create a customer-support assistant connected to uploaded "
-            "company policy documents. The assistant should answer "
-            "employee questions using those policy documents. If the "
-            "answer cannot be found, it should clearly state that the "
-            "information is unavailable rather than guessing."
-        ),
-        expected_behavior=(
-            "The interpretation must preserve the customer-support "
-            "purpose, document-only grounding, uploaded company policy "
-            "documents, missing-information behaviour, and prohibition "
-            "against inventing company policy."
-        ),
-        metadata={
-            "dataset_version": settings.dataset_version,
-            "capture_method": "manual",
-        },
+    cases = (
+        RequirementInterpretationDatasetLoader.load(
+            DATASET_PATH
+        )
     )
 
-    deterministic_checks = [
-        RequiredTermsCheck(
-            required_terms=[
-                "policy documents",
-            ]
-        ),
-        ForbiddenTermsCheck(
-            forbidden_terms=[
-                "internet search",
-                "general-purpose chatbot",
-            ]
-        ),
-    ]
-
-    runner = CheckpointRunner(settings=settings)
-
-    result = runner.run(
-        checkpoint=checkpoint,
-        deterministic_checks=deterministic_checks,
+    print(
+        f"Loaded {len(cases)} requirement "
+        f"interpretation checkpoint(s)."
     )
 
-    print_checkpoint_result(result)
+    runner = CheckpointRunner(
+        settings=settings,
+    )
+
+    results: list[CheckpointResult] = []
+
+    for case in cases:
+        result = runner.run(
+            checkpoint=case.checkpoint,
+            deterministic_checks=(
+                case.deterministic_checks
+            ),
+        )
+
+        results.append(result)
+        print_checkpoint_result(result)
+
+    print_run_summary(results)
 
 
 if __name__ == "__main__":
