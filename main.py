@@ -7,6 +7,57 @@ from evaluation_settings import EvaluationSettings
 from evaluations import CheckpointRunner
 
 
+def print_checkpoint_result(result) -> None:
+    """
+    Print the combined semantic and deterministic outcome.
+    """
+
+    print("\n" + "=" * 70)
+    print("CHECKPOINT RESULT")
+    print("=" * 70)
+
+    print(f"Checkpoint ID : {result.checkpoint_id}")
+    print(f"Stage         : {result.stage.value}")
+    print(f"Final Status  : {result.status.value.upper()}")
+
+    print("\nSemantic evaluation")
+    print("-" * 70)
+
+    for metric in result.semantic_results:
+        status = "PASS" if metric.passed else "FAIL"
+
+        print(
+            f"{metric.metric_name}: "
+            f"{metric.score:.2f} "
+            f"(threshold {metric.threshold:.2f}) "
+            f"- {status}"
+        )
+        print(f"Reason: {metric.reason}")
+        print()
+
+    print("Deterministic validation")
+    print("-" * 70)
+
+    if not result.deterministic_results:
+        print("No deterministic checks configured.")
+
+    for check in result.deterministic_results:
+        status = "PASS" if check.passed else "FAIL"
+
+        print(f"{check.check_name}: {status}")
+        print(f"Reason: {check.reason}")
+        print()
+
+    print("Combined outcome")
+    print("-" * 70)
+    print(f"Semantic passed      : {result.semantic_passed}")
+    print(
+        f"Deterministic passed : "
+        f"{result.deterministic_passed}"
+    )
+    print(f"Checkpoint status    : {result.status.value.upper()}")
+
+
 def main() -> None:
     settings = EvaluationSettings()
 
@@ -60,13 +111,7 @@ def main() -> None:
         deterministic_checks=deterministic_checks,
     )
 
-    print("\nCheckpoint deterministic outcome")
-    print("-" * 60)
-    print(
-        "PASS"
-        if result["deterministic_passed"]
-        else "FAIL"
-    )
+    print_checkpoint_result(result)
 
 
 if __name__ == "__main__":

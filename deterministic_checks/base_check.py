@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from checkpoints import EvaluationCheckpoint
+from checkpoints.evaluation_checkpoint import EvaluationCheckpoint
 from deterministic_checks.check_result import (
     DeterministicCheckResult,
 )

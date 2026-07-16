@@ -1,4 +1,4 @@
-from checkpoints import EvaluationCheckpoint
+from checkpoints.evaluation_checkpoint import EvaluationCheckpoint
 from deterministic_checks.base_check import (
     BaseDeterministicCheck,
 )
