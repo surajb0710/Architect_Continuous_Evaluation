@@ -7,9 +7,12 @@ from typing import Any
 from checkpoints.architect_stage import ArchitectStage
 from checkpoints.evaluation_checkpoint import EvaluationCheckpoint
 from deterministic_checks.base_check import BaseDeterministicCheck
-from deterministic_checks.requirement_checks import (
-    ForbiddenTermsCheck,
-    RequiredTermsCheck,
+from deterministic_checks.requirement_rule import (
+    RequirementRule,
+    RequirementRuleType,
+)
+from deterministic_checks.requirement_rule_check import (
+    RequirementRuleCheck,
 )
 
 
@@ -141,35 +144,12 @@ class RequirementInterpretationDatasetLoader:
             metadata=metadata,
         )
 
-        required_terms = cls._optional_string_list(
-            item=item,
-            field_name="required_terms",
-            checkpoint_id=checkpoint_id,
-        )
-
-        forbidden_terms = cls._optional_string_list(
-            item=item,
-            field_name="forbidden_terms",
-            checkpoint_id=checkpoint_id,
-        )
-
-        deterministic_checks: list[
-            BaseDeterministicCheck
-        ] = []
-
-        if required_terms:
-            deterministic_checks.append(
-                RequiredTermsCheck(
-                    required_terms=required_terms,
-                )
+        deterministic_checks = (
+            cls._build_deterministic_checks(
+                item=item,
+                checkpoint_id=checkpoint_id,
             )
-
-        if forbidden_terms:
-            deterministic_checks.append(
-                ForbiddenTermsCheck(
-                    forbidden_terms=forbidden_terms,
-                )
-            )
+        )
 
         return LoadedCheckpointCase(
             checkpoint=checkpoint,
@@ -224,3 +204,159 @@ class RequirementInterpretationDatasetLoader:
             )
 
         return normalized_values
+
+    @classmethod
+    def _build_deterministic_checks(
+            cls,
+            item: dict[str, Any],
+            checkpoint_id: str,
+    ) -> list[BaseDeterministicCheck]:
+        raw_rules = item.get(
+            "deterministic_rules",
+            [],
+        )
+
+        if not isinstance(raw_rules, list):
+            raise ValueError(
+                f"Dataset item '{checkpoint_id}' field "
+                f"'deterministic_rules' must be an array."
+            )
+
+        checks: list[BaseDeterministicCheck] = []
+
+        for rule_index, raw_rule in enumerate(raw_rules):
+            rule = cls._build_requirement_rule(
+                raw_rule=raw_rule,
+                checkpoint_id=checkpoint_id,
+                rule_index=rule_index,
+            )
+
+            checks.append(
+                RequirementRuleCheck(rule=rule)
+            )
+
+        return checks
+
+    @classmethod
+    def _build_requirement_rule(
+            cls,
+            raw_rule: Any,
+            checkpoint_id: str,
+            rule_index: int,
+    ) -> RequirementRule:
+        if not isinstance(raw_rule, dict):
+            raise ValueError(
+                f"Dataset item '{checkpoint_id}' rule at "
+                f"index {rule_index} must be an object."
+            )
+
+        rule_id = cls._required_rule_string(
+            raw_rule=raw_rule,
+            field_name="rule_id",
+            checkpoint_id=checkpoint_id,
+            rule_index=rule_index,
+        )
+
+        rule_type_value = cls._required_rule_string(
+            raw_rule=raw_rule,
+            field_name="type",
+            checkpoint_id=checkpoint_id,
+            rule_index=rule_index,
+        )
+
+        description = cls._required_rule_string(
+            raw_rule=raw_rule,
+            field_name="description",
+            checkpoint_id=checkpoint_id,
+            rule_index=rule_index,
+        )
+
+        try:
+            rule_type = RequirementRuleType(
+                rule_type_value
+            )
+        except ValueError as error:
+            supported_types = ", ".join(
+                rule_type.value
+                for rule_type in RequirementRuleType
+            )
+
+            raise ValueError(
+                f"Dataset item '{checkpoint_id}' rule "
+                f"'{rule_id}' has unsupported type "
+                f"'{rule_type_value}'. Supported types: "
+                f"{supported_types}."
+            ) from error
+
+        terms = cls._rule_terms(
+            raw_rule=raw_rule,
+            checkpoint_id=checkpoint_id,
+            rule_id=rule_id,
+        )
+
+        case_sensitive = raw_rule.get(
+            "case_sensitive",
+            False,
+        )
+
+        if not isinstance(case_sensitive, bool):
+            raise ValueError(
+                f"Dataset item '{checkpoint_id}' rule "
+                f"'{rule_id}' field 'case_sensitive' "
+                f"must be a boolean."
+            )
+
+        return RequirementRule(
+            rule_id=rule_id,
+            rule_type=rule_type,
+            description=description,
+            terms=terms,
+            case_sensitive=case_sensitive,
+        )
+
+    @staticmethod
+    def _required_rule_string(
+            raw_rule: dict[str, Any],
+            field_name: str,
+            checkpoint_id: str,
+            rule_index: int,
+    ) -> str:
+        value = raw_rule.get(field_name)
+
+        if not isinstance(value, str) or not value.strip():
+            raise ValueError(
+                f"Dataset item '{checkpoint_id}' rule at "
+                f"index {rule_index} field '{field_name}' "
+                f"must be a non-empty string."
+            )
+
+        return value.strip()
+
+    @staticmethod
+    def _rule_terms(
+            raw_rule: dict[str, Any],
+            checkpoint_id: str,
+            rule_id: str,
+    ) -> list[str]:
+        terms = raw_rule.get("terms")
+
+        if not isinstance(terms, list) or not terms:
+            raise ValueError(
+                f"Dataset item '{checkpoint_id}' rule "
+                f"'{rule_id}' field 'terms' must be a "
+                f"non-empty array."
+            )
+
+        normalized_terms: list[str] = []
+
+        for term_index, term in enumerate(terms):
+            if not isinstance(term, str) or not term.strip():
+                raise ValueError(
+                    f"Dataset item '{checkpoint_id}' rule "
+                    f"'{rule_id}' contains an invalid term "
+                    f"at index {term_index}."
+                )
+
+            normalized_terms.append(term.strip())
+
+        return normalized_terms

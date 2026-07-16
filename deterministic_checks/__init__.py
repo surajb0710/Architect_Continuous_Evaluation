@@ -1,18 +1,18 @@
-from deterministic_checks.base_check import (
-    BaseDeterministicCheck,
+from deterministic_checks.base_check import BaseDeterministicCheck
+from deterministic_checks.check_result import DeterministicCheckResult
+from deterministic_checks.requirement_rule import (
+    RequirementRule,
+    RequirementRuleType,
 )
-from deterministic_checks.check_result import (
-    DeterministicCheckResult,
-)
-from deterministic_checks.requirement_checks import (
-    ForbiddenTermsCheck,
-    RequiredTermsCheck,
+from deterministic_checks.requirement_rule_check import (
+    RequirementRuleCheck,
 )
 
 
 __all__ = [
     "BaseDeterministicCheck",
     "DeterministicCheckResult",
-    "ForbiddenTermsCheck",
-    "RequiredTermsCheck",
+    "RequirementRule",
+    "RequirementRuleCheck",
+    "RequirementRuleType",
 ]

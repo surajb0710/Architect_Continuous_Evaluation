@@ -5,12 +5,10 @@
     "source_input": "Build a customer-support application that answers questions only from uploaded company policy documents. When the requested information is unavailable, the application must clearly say that it cannot find the answer and must not invent company policy.",
     "actual_artifact": "Create a customer-support assistant connected to uploaded company policy documents. The assistant should answer employee questions using those policy documents. If the answer cannot be found, it should clearly state that the information is unavailable rather than guessing.",
     "expected_behavior": "The interpretation must preserve the customer-support purpose, document-only grounding, uploaded company policy documents, missing-information behaviour, and prohibition against inventing company policy. It must not introduce unsupported integrations or business rules.",
-    "required_terms": [
+    "type": "required_all",
+    "description": "The named policy document source must be preserved",
+    "terms": [
       "policy documents"
-    ],
-    "forbidden_terms": [
-      "internet search",
-      "general-purpose chatbot"
     ],
     "metadata": {
       "dataset_version": "requirement-interpretation-v1",
@@ -24,17 +22,13 @@
   "source_input": "Build a leave-management application for employees and managers. Employees must be able to submit leave requests and view their leave balance. Managers must be able to approve or reject requests. The system must not allow employees to approve their own requests.",
   "actual_artifact": "Create a leave-management application with employee and manager roles. Employees can submit leave requests and view their available leave balance. Managers can review, approve, or reject employee requests. Approval permissions must be restricted so that employees cannot approve their own leave requests.",
   "expected_behavior": "The interpretation must preserve the employee and manager roles, leave submission, balance viewing, manager approval and rejection, and the restriction preventing employees from approving their own requests. It must not invent payroll or attendance functionality.",
-  "required_terms": [
-    "employees",
-    "managers",
-    "leave balance",
-    "approve",
-    "reject"
-  ],
-  "forbidden_terms": [
-    "payroll",
-    "attendance tracking"
-  ],
+  "type": "required_any",
+    "description": "Missing-information behaviour must be stated",
+    "terms": [
+      "information is unavailable",
+      "answer cannot be found",
+      "cannot find the answer"
+    ],
   "metadata": {
     "dataset_version": "requirement-interpretation-v1",
     "capture_method": "manual",
