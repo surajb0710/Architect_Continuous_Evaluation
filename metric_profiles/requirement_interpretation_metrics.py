@@ -68,19 +68,21 @@ def build_requirement_interpretation_metrics(
     )
 
     unsupported_assumptions = GEval(
-        name="Unsupported Assumptions",
+        name="Absence of Unsupported Assumptions",
         criteria=(
-            "Evaluate whether the actual output introduces material "
-            "features, business rules, users, integrations, data "
-            "sources, permissions, technical decisions, or constraints "
-            "that are not supported by the input. Reasonable wording "
-            "clarifications are acceptable, but invented requirements "
-            "or unjustified design decisions must be penalized."
+             "Evaluate only whether the actual output introduces material "
+                "features, actors, integrations, business rules, permissions, "
+                "technical decisions, or constraints that are unsupported by "
+                "the input. Do not penalize missing requirements in this metric; "
+                "omissions are evaluated by other metrics. Give a high score when "
+                "no unsupported assumptions are introduced, even if the output "
+                "is incomplete. Give a low score only when unsupported additions "
+                "or invented decisions are present."
         ),
         evaluation_params=[
             SingleTurnParams.INPUT,
             SingleTurnParams.ACTUAL_OUTPUT,
-            SingleTurnParams.EXPECTED_OUTPUT,
+           # SingleTurnParams.EXPECTED_OUTPUT,
         ],
         model=model,
         threshold=threshold,

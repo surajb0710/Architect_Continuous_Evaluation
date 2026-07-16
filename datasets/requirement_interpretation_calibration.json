@@ -1,0 +1,128 @@
+[
+  {
+    "checkpoint_id": "CAL-REQ-001",
+    "stage": "requirement_interpretation",
+    "source_input": "Build a customer-support application that answers questions only from uploaded company policy documents. When the requested information is unavailable, the application must clearly say that it cannot find the answer and must not invent company policy.",
+    "actual_artifact": "Create a customer-support assistant connected to uploaded company policy documents. The assistant must answer employee questions exclusively from those documents. If the requested information cannot be found, it must clearly state that the information is unavailable and must not guess or invent company policy.",
+    "expected_behavior": "The interpretation must preserve the customer-support purpose, uploaded policy-document grounding, document-only answering restriction, missing-information behaviour, and prohibition against inventing company policy. It must not introduce unsupported capabilities or integrations.",
+    "deterministic_rules": [
+      {
+        "rule_id": "CAL-REQ-001-R1",
+        "type": "required_all",
+        "description": "The named policy-document source must be preserved",
+        "terms": [
+          "policy documents"
+        ]
+      },
+      {
+        "rule_id": "CAL-REQ-001-R2",
+        "type": "forbidden_any",
+        "description": "Unsupported external search must not be introduced",
+        "terms": [
+          "internet search",
+          "web search",
+          "web browsing"
+        ]
+      }
+    ],
+    "metadata": {
+      "dataset_version": "requirement-calibration-v1",
+      "capture_method": "controlled_example",
+      "scenario_quality": "good",
+      "expected_statuses": [
+        "pass"
+      ]
+    }
+  },
+  {
+    "checkpoint_id": "CAL-REQ-002",
+    "stage": "requirement_interpretation",
+    "source_input": "Build an expense-management application. Employees must submit expense claims with the amount, category, and receipt. Managers must approve or reject claims. Finance users must export approved expenses as a monthly CSV. The system must retain a complete audit history for seven years. Employees must never be allowed to approve their own expense claims.",
+    "actual_artifact": "Create an expense-management application for employees, managers, and finance users. Employees can submit expense claims with the amount, category, and receipt. Managers can approve or reject submitted claims. Finance users can export approved expenses as a monthly CSV. The application should maintain an audit history of expense activity.",
+    "expected_behavior": "The interpretation must preserve claim submission with amount, category and receipt, manager approval and rejection, monthly CSV export for finance users, seven-year audit-history retention, and the restriction preventing employees from approving their own claims. It must not weaken or omit either mandatory constraint.",
+    "deterministic_rules": [
+      {
+        "rule_id": "CAL-REQ-002-R1",
+        "type": "required_all",
+        "description": "Named expense fields and export format must be preserved",
+        "terms": [
+          "amount",
+          "category",
+          "receipt",
+          "monthly CSV"
+        ]
+      },
+      {
+        "rule_id": "CAL-REQ-002-R2",
+        "type": "required_all",
+        "description": "Manager decisions must be represented",
+        "terms": [
+          "approve",
+          "reject"
+        ]
+      },
+      {
+        "rule_id": "CAL-REQ-002-R3",
+        "type": "forbidden_any",
+        "description": "Unsupported automatic approval must not be introduced",
+        "terms": [
+          "automatically approve",
+          "automatic approval"
+        ]
+      }
+    ],
+    "metadata": {
+      "dataset_version": "requirement-calibration-v1",
+      "capture_method": "controlled_example",
+      "scenario_quality": "borderline",
+      "expected_statuses": [
+        "warning",
+        "fail"
+      ]
+    }
+  },
+  {
+    "checkpoint_id": "CAL-REQ-003",
+    "stage": "requirement_interpretation",
+    "source_input": "Build a leave-management application for employees and managers. Employees must submit leave requests and view their leave balance. Managers must approve or reject requests. Employees must never approve their own requests. Do not include payroll or attendance-management functionality.",
+    "actual_artifact": "Create a comprehensive HR application containing payroll, attendance tracking, and leave management. Employees can submit and approve their own leave requests. The application should automatically update payroll after leave is approved.",
+    "expected_behavior": "The interpretation must preserve employee leave submission, leave-balance viewing, manager approval and rejection, and the restriction preventing employees from approving their own requests. Payroll and attendance-management features must not be introduced.",
+    "deterministic_rules": [
+      {
+        "rule_id": "CAL-REQ-003-R1",
+        "type": "required_all",
+        "description": "Leave-balance functionality must be preserved",
+        "terms": [
+          "leave balance"
+        ]
+      },
+      {
+        "rule_id": "CAL-REQ-003-R2",
+        "type": "forbidden_any",
+        "description": "Explicitly prohibited HR capabilities must not be introduced",
+        "terms": [
+          "payroll",
+          "attendance tracking",
+          "attendance management"
+        ]
+      },
+      {
+        "rule_id": "CAL-REQ-003-R3",
+        "type": "forbidden_any",
+        "description": "Employees must not approve their own leave requests",
+        "terms": [
+          "approve their own",
+          "approve their own leave requests"
+        ]
+      }
+    ],
+    "metadata": {
+      "dataset_version": "requirement-calibration-v1",
+      "capture_method": "controlled_example",
+      "scenario_quality": "bad",
+      "expected_statuses": [
+        "fail"
+      ]
+    }
+  }
+]

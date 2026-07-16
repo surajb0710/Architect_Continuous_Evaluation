@@ -10,7 +10,7 @@ from evaluations.checkpoint_runner import CheckpointRunner
 
 
 DATASET_PATH = Path(
-    "datasets/requirement_interpretation.json"
+    "datasets/requirement_interpretation_regression.json"
 )
 
 

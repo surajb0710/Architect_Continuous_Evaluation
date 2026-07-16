@@ -16,7 +16,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DATASET_PATH = (
     PROJECT_ROOT
     / "datasets"
-    / "requirement_interpretation.json"
+    / "requirement_interpretation_regression.json"
 )
 
 SETTINGS = EvaluationSettings()
