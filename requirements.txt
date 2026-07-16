@@ -1,0 +1,4 @@
+deepeval
+openai
+python-dotenv
+pytest
