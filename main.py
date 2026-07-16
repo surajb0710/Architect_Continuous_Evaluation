@@ -1,16 +1,45 @@
-# This is a sample Python script.
-
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
-
-
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+from checkpoints import ArchitectStage, EvaluationCheckpoint
+from evaluation_settings import EvaluationSettings
+from evaluations import CheckpointRunner
 
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
+def main() -> None:
+    settings = EvaluationSettings()
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    checkpoint = EvaluationCheckpoint(
+        checkpoint_id="REQ-001",
+        stage=ArchitectStage.REQUIREMENT_INTERPRETATION,
+        source_input=(
+            "Build a customer-support application that answers "
+            "questions only from uploaded company policy documents. "
+            "When the requested information is unavailable, the "
+            "application must clearly say that it cannot find the "
+            "answer and must not invent company policy."
+        ),
+        actual_artifact=(
+            "Create a customer-support assistant connected to uploaded "
+            "company policy documents. The assistant should answer "
+            "employee questions using those documents. If the answer "
+            "cannot be found in the documents, it should clearly state "
+            "that the information is unavailable rather than guessing."
+        ),
+        expected_behavior=(
+            "The interpretation must preserve the customer-support "
+            "purpose, document-only grounding, use of uploaded company "
+            "policy documents, explicit missing-information behaviour, "
+            "and prohibition against inventing company policy. It must "
+            "not introduce unsupported integrations or business rules."
+        ),
+        metadata={
+            "dataset_version": settings.dataset_version,
+            "capture_method": "manual",
+        },
+    )
+
+    runner = CheckpointRunner(settings=settings)
+
+    runner.run(checkpoint)
+
+
+if __name__ == "__main__":
+    main()
